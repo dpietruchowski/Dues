@@ -101,3 +101,5 @@ ENV/
 *.iml
 *.pyc
 *.xml
+
+db.sqlite3
