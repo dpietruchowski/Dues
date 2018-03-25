@@ -24,23 +24,23 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="duesnav">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
+          <ul class="nav navbar-nav mr-auto">
+            <li class="nav-item {% block nav-account %}{% endblock %}">
               <a class="nav-link" href="/account">Stan konta</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item {% block nav-funds %}{% endblock %}">
               <a class="nav-link" href="/funds">Moje skladki</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item {% block nav-noti %}{% endblock %}">
               <a class="nav-link" href="#">Powiadomienia</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item {% block nav-history %}{% endblock %}">
               <a class="nav-link" href="/history">Historia</a>
             </li>
           </ul>
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item" style="">
-              <a class="nav-link" href="/logout">Log out</a>
+            <li class="nav-item">
+              <a class="nav-link active" href="/logout">Log out</a>
             </li>
           </ul>
         </div>
