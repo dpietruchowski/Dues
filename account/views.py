@@ -98,6 +98,9 @@ def edit_funds(request, pk):
         return post_funds(request, BeneficiaryFormSet, pk)
     else:
         funds = models.Funds.objects.get(pk=pk)
+        account = models.Account.objects.get(user=request.user)
+        if account != funds.owner:
+            return HttpResponse("Nie masz uprawnien do edytowania tej skladki")
         form = myforms.FundsForm(initial={
             'purpose': funds.purpose,
             'purpose_price': funds.purpose_price
