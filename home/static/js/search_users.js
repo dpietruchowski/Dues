@@ -92,13 +92,21 @@ $(document).ready(function() {
     });
 
     $(document).on('focusin', '#beneficiary_table :enabled', function() {
-        $(this).data('val', $(this).val());
+        var value = parseFloat($(this).val());
+        if(isNaN(value))
+            value = 0;
+        $(this).data('val', value);
     })
     $('#beneficiary_table').off().on('change', ':enabled', function() {
         var prev_value = parseFloat($(this).data('val'));
         $(this).data('val', $(this).val());
         var value = parseFloat($(this).val());
+        if(isNaN(value))
+            value = 0;
         var sum_of_contribution = parseFloat($('#sum_of_contribution').text());
+        console.log(prev_value);
+        console.log(value);
+        console.log(sum_of_contribution);
         sum_of_contribution = sum_of_contribution - (prev_value - value);
         $('#sum_of_contribution').text(sum_of_contribution.toFixed(2));
     })
