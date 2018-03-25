@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dlugi</title>
+    {% load staticfiles %}
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Custom styles for this auth_template.html -->
+    <link href="{% static 'css/starter-template.css' %}" rel="stylesheet">
+    <link href="{% static 'css/my.css' %}" rel="stylesheet">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/home">Dues</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#duesnav" aria-controls="duesnav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="duesnav">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/account">Stan konta</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/funds">Moje skladki</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Powiadomienia</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/history">Historia</a>
+            </li>
+          </ul>
+        </div>
+        <div class="nav-item" style="">
+          <a class="nav-link" href="logout">Log out</a>
+        </div>
+      </div>
+    </nav>
+
+    <main role="main" class="container">
+      <div class="container" align="middle" style="padding: 10px;">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </main>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/search_users.js' %}"></script>
+    <script src="{% static 'js/popper.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    {% block scripts %}
+    {% endblock %}
+  </body>
+</html>

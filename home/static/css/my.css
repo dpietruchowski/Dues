@@ -1,0 +1,46 @@
+.main-cut-text-left {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 50%;
+  float: left;
+}
+.main-cut-text-right {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 50%;
+  float: right;
+}
+
+.cut-text-left {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 70%;
+  float: left;
+}
+.cut-text-right {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 30%;
+  float: right;
+}
+
+.main-dues-card {
+    border-color: sandybrown;
+    border-width: 1px;
+    background-color: peachpuff;
+}
+
+.dues-card {
+    border-color: khaki;
+    border-width: 1px;
+    background-color: beige;
+}
+
+.dues-active {
+    border-color: red;
+    border: 2px;
+}

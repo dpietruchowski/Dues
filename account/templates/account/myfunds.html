@@ -1,0 +1,40 @@
+{% extends "template.html" %}
+
+{% load staticfiles %}
+{% block content %}
+
+        <a href="funds/new" class="btn btn-primary">Nowa skladka</a>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Data</th>
+          <th scope="col">Cel</th>
+          <th scope="col">Cena</th>
+          <th scope="col">Zebrane pieniadze</th>
+          <th scope="col">Liczba beneficjentow</th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for funds in myfunds %}
+        <tr>
+            <td>{{ funds.date }}</td>
+            <td>{{ funds.purpose }}</td>
+            <td>{{ funds.purpose_price }}</td>
+            <td>{{ funds.sum_of_contribution }}</td>
+            <td>{{ funds.beneficiaries.count }}</td>
+          <td><a href="funds/{{ funds.pk }}" class="btn btn-primary">Zobacz</a></td>
+          <td><a href="funds/{{ funds.pk }}/edit" class="btn btn-primary">Edytuj</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% for due_user in dues %}
+  {% endfor %}
+
+{% endblock %}
+
+{% block scripts %}>
+{% endblock %}

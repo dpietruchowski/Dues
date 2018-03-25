@@ -1,0 +1,72 @@
+{% extends "template.html" %}
+
+{% load staticfiles %}
+{% block content %}
+
+    <div class="card">
+      <div class="card-body">
+        <div style="float:left;"><p class="card-text" >Tworca</p></div>
+        <div style="float:right;"><p class="card-text" >{{ funds.owner.user.username }}</p></div>
+      </div>
+      <div class="card-body">
+        <div style="float:left;"><p class="card-text" >Cel skladki</p></div>
+        <div style="float:right;"><p class="card-text" >{{ funds.purpose }}</p></div>
+      </div>
+      <div class="card-body">
+        <div style="float:left;"><p class="card-text" >Cena skladki</p></div>
+        <div style="float:right;"><p class="card-text" >{{ funds.purpose_price }}</p></div>
+      </div>
+      <div class="card-body">
+        <div style="float:left;"><p class="card-text" >Suma zebranych pieniedzy</p></div>
+        <div style="float:right;"><p class="card-text" >{{ funds.sum_of_contribution }}</p></div>
+      </div>
+      <div class="card-body">
+        <div style="float:left;"><p class="card-text" >Beneficjenci:</p></div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Imie</th>
+              <th scope="col">Wklad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for beneficiary in funds.beneficiaries.all %}
+            <tr>
+                <td>{{ beneficiary.account.user.username }}</td>
+                <td>{{ beneficiary.contribution }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-body">
+        <div style="float:left;"><p class="card-text" >Dlugi:</p></div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Od</th>
+              <th scope="col">Do</th>
+              <th scope="col">Ile</th>
+              <th scope="col">Zaplacone</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for due in funds.dues.all %}
+            <tr>
+                <td>{{ due.account.user.username }}</td>
+                <td>{{ due.for_account.user.username }}</td>
+                <td>{{ due.amount }}</td>
+                <td>{{ due.is_paid }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% for due_user in dues %}
+  {% endfor %}
+
+{% endblock %}
+
+{% block scripts %}>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "template.html" %}
+
+{% load staticfiles %}
+{% block content %}
+
+    <div class="card w-50">
+      <h4 class="card-header">
+        {{ user_name }}: Stan konta
+      </h4>
+      <div class="card-body">
+        <p class="card-text"><h5>{{ account_value }}zl</h5></p>
+      </div>
+      </div>
+  <div class="container">
+  <h5>Dlugi do zaplacenia:</h5>
+  {% for due_user, due_amounts in dues.items %}
+    <div class="card">
+      <div class="card-header">
+        <div style="float:left;">
+          <p class="card-text" >{{ due_user }}</p>
+        </div>
+      </div>
+    {% for funds_id, amount in due_amounts.items %}
+    <div class="card-body">
+      <div style="float:left;"><p class="card-text" >{{ amount }}zl</p></div>
+      <div style="float:right;">
+        <a href="/funds/{{ funds_id }}" class="btn btn-primary">Skladka</a>
+        <a href="#" class="btn btn-primary">Powiadom</a>
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+  {% endfor %}
+  </div>
+
+{% endblock %}
+
+{% block scripts %}>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "template.html" %}
+
+{% load staticfiles %}
+{% block content %}
+
+  <div class="row">
+    <form method="post">
+      {% csrf_token %}
+      <div class="card">
+        <div class="card-body">
+          <div style="float:left;"><p class="card-text" >Tworca</p></div>
+          <div style="float:right;"><p class="card-text" >{{ owner }}</p></div>
+        </div>
+        <div class="card-body">
+          <div style="float:left;"><p class="card-text" >Cel skladki</p></div>
+          <div style="float:right;"><p class="card-text" >{{ form.purpose }}</p></div>
+        </div>
+        <div class="card-body">
+          <div style="float:left;"><p class="card-text" >Cena skladki</p></div>
+          <div style="float:right;"><p class="card-text" >{{ form.purpose_price }}</p></div>
+        </div>
+        <div class="card-body">
+          <div style="float:left;"><p class="card-text" >Suma zebranych pieniedzy</p></div>
+          <div style="float:right;"><p class="card-text" id="sum_of_contribution">{{ sum_of_contribution }}</p></div>
+        </div>
+        <div class="card-body">
+          <div style="float:left;"><p class="card-text" >Beneficjenci:</p></div>
+          <table class="table table-striped" id="beneficiary_table">
+            <thead>
+              <tr>
+                <th scope="col">Imie</th>
+                <th scope="col">Wklad</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody id="form_set">
+              {% for form in formset %}
+              <tr id="id_form-{{ forloop.counter0 }}-tr" name="form-{{ forloop.counter0 }}-tr">
+                  <td>{{ form.account_id.value }}</td>
+                  <td hidden="true">{{ form.account_id }}</td>
+                  <td>{{ form.contribution }}</td>
+                  <td>
+                    <input class='btn btn-primary delete_beneficiary'
+                           type='button' value='Usun' id="id_form-{{ forloop.counter0 }}-button"
+                           data-username="{{ form.account_id.value }}" data-form-idx="{{ forloop.counter0 }}" />
+                  </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-body">
+        <input class="btn btn-primary" type="submit" value="Zapisz" />
+      </div>
+      </div>
+      {{ formset.management_form }}
+    </form>
+    <div class="card">
+      <div class="card-body">
+        <div>
+          <input type="text" id="search_user_text" />
+          <input class="btn btn-primary" type="button" value="Szukaj" id="search_user" />
+        </div>
+        <table class="table table-striped" id="add_beneficiary_wrapper">
+          <thead>
+            <tr>
+              <th scope="col">Imie</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="search_user_list">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div style="display: none">
+    <table>
+      <tbody id="empty_form">
+        <tr id="id_form-__prefix__-tr" name="form-__prefix__-tr">
+          <td>__username__ {{ formset.empty_form.account_id }}</td>
+          <td>{{ formset.empty_form.contribution }}</td>
+          <td><input class='btn btn-primary delete_beneficiary' type='button' value='Usun' id="id_form-__prefix__-button" data-username="__username__" data-form-idx="__prefix__" /></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}>
+
+<script>
+</script>
+{% endblock %}

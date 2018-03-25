@@ -1,0 +1,12 @@
+{% extends "auth_template.html" %}
+
+{% block content %}
+    <div style="width: 500px; margin-left: auto; margin-right: auto;">
+      <h2>Sign up</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign up</button>
+      </form>
+    </div>
+{% endblock %}
