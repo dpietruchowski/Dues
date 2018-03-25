@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 import pdb
 
 class Account(models.Model):
@@ -60,6 +61,33 @@ class Account(models.Model):
             funds.append(as_beneficiary.funds)
         return funds
 
+class FundsManager:
+    def __init__(self, funds):
+        self.funds = funds
+
+    def update_beneficiaries(self, account_dict):
+        old_beneficiaries = set()
+        new_beneficiaries = set()
+        for beneficiary in self.funds.beneficiaries.all():
+            old_beneficiaries.update({beneficiary.account})
+
+        for username, contribution in account_dict.items():
+            user = User.objects.get(username=username)
+            account = Account.objects.get(user=user)
+            new_beneficiaries.update({account})
+            self.funds.update_beneficiary(account, contribution)
+
+        for account in old_beneficiaries.difference(new_beneficiaries):
+            self.funds.delete_beneficiary(account)
+
+        self.funds.update()
+
+    def delete_funds(self):
+        for due in self.funds.dues.all():
+            due.delete()
+        for beneficiary in self.funds.beneficiaries.all():
+            beneficiary.delete()
+        self.funds.delete()
 
 class Funds(models.Model):
     owner = models.ForeignKey(Account, on_delete=models.CASCADE)

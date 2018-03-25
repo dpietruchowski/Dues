@@ -25,8 +25,9 @@
             <td>{{ funds.purpose_price }}</td>
             <td>{{ funds.sum_of_contribution }}</td>
             <td>{{ funds.beneficiaries.count }}</td>
-          <td><a href="funds/{{ funds.pk }}" class="btn btn-primary">Zobacz</a></td>
-          <td><a href="funds/{{ funds.pk }}/edit" class="btn btn-primary">Edytuj</a></td>
+          <td><a href="funds/{{ funds.pk }}" class="btn btn-primary">Zobacz</a>
+          <a href="funds/{{ funds.pk }}/edit" class="btn btn-primary">Edytuj</a>
+          <a href="funds/{{ funds.pk }}/delete" class="btn btn-primary">Usun</a></td>
         </tr>
         {% endfor %}
       </tbody>

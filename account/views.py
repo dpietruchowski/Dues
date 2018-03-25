@@ -81,12 +81,9 @@ def post_funds(request, BeneficiaryFormSet, pk):
             )
         else:
             funds = models.Funds.objects.get(pk=pk)
-        print(beneficiaries)
-        for username, contribution in beneficiaries.items():
-            user = User.objects.get(username=username)
-            account = models.Account.objects.get(user=user)
-            funds.update_beneficiary(account, contribution)
-        funds.update()
+        funds_manager = models.FundsManager(funds)
+        funds_manager.update_beneficiaries(beneficiaries)
+        funds_manager.delete_funds()
         return HttpResponse("YEAH UDALO SIE!!")
 
     return HttpResponse("dupa nie udalo sie")
@@ -133,6 +130,16 @@ def new_funds(request):
         'sum_of_contribution': 0,
         'owner': request.user.username
     })
+
+@login_required(login_url='login')
+def delete_funds(request, pk):
+    account = models.Account.objects.get(user=request.user)
+    funds = models.Funds.objects.get(pk=pk)
+    if account != funds.owner:
+        return HttpResponse("Nie masz uprawnien do edytowania tej skladki")
+    funds_manager = models.FundsManager(funds)
+    funds_manager.delete_funds()
+    return HttpResponse("Udalo sie usunales skladke( id : " + str(pk) + " )")
 
 
 @login_required(login_url='login')
