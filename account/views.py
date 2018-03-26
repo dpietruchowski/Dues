@@ -83,7 +83,6 @@ def post_funds(request, BeneficiaryFormSet, pk):
             funds = models.Funds.objects.get(pk=pk)
         funds_manager = models.FundsManager(funds)
         funds_manager.update_beneficiaries(beneficiaries)
-        funds_manager.delete_funds()
         return HttpResponse("YEAH UDALO SIE!!")
 
     return HttpResponse("dupa nie udalo sie")
