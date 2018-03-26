@@ -1,6 +1,38 @@
 {% extends "template.html" %}
 
 {% block content %}
-		    <h1>Dues - aplikacja do rozliaczania sie ze znajomymi :)</h1>
-        <img src="http://www.thehindu.com/opinion/op-ed/article19253786.ece/alternates/FREE_660/Th11-Paper%20money" class="img-responsive img-rounded">
+		    <h1>Dues</h1>
+        <div align="left">
+          <div>
+            <h3 style="padding: 10px;">
+              Jest to strona służąca do tworzenia składek ze znajomymi na wspólny cel.
+              Suma zebranych pieniędzy jest dzielona na liczbę beneficjentów
+              i na jej podstawie tworzone są długi (kto komu ile ma oddać).
+            </h3>
+          </div>
+          <div>
+            <h4>Nawigacja:</h4>
+            <ul>
+              <li>Stan konta - pokazuje wszystkie długi użytkownika</li>
+              <li>Moje składki - pokazuje składki stworzone przez użytkownika oraz pozwala stworzyć nową składkę</li>
+              <li>Powiadomienia - pokazuje wszystkie powiadomienia od użytkowników, którzy spłacili swój dług (niezaimplementowne)</li>
+              <li>Historia - pokazuje wszystkie składki użytkownika, w których był beneficjentem</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Użyte technologie:</h4>
+            <ul>
+              <li>Django - framework python służący do tworzenia aplikacji webowych.</li>
+              <li>SQLite - domyślna baza danych Django, wystarczająca na potrzeby projektu.</li>
+              <li>
+                jQuery - biblioteka dla języka JavaScript, wykorzystywana w projekcie do:
+                <ul>
+                  <li>dynamicznego tworzenia formularzy</li>
+                  <li>wyszukiwarki użytkowników, bez konieczności renderowania strony</li>
+                </ul>
+              </li>
+              <li>Bootstrap - framework, który ułatwia tworzenie interfejsu graficznego stron</li>
+            </ul>
+          </div>
+        </div>
 {% endblock %}
