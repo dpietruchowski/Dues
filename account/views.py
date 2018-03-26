@@ -82,6 +82,10 @@ def post_funds(request, BeneficiaryFormSet, pk):
         else:
             funds = models.Funds.objects.get(pk=pk)
         funds_manager = models.FundsManager(funds)
+        funds_manager.update(
+            purpose=purpose,
+            purpose_price=purpose_price
+        )
         funds_manager.update_beneficiaries(beneficiaries)
         return HttpResponse("YEAH UDALO SIE!!")
 

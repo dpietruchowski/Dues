@@ -65,6 +65,11 @@ class FundsManager:
     def __init__(self, funds):
         self.funds = funds
 
+    def update(self, purpose, purpose_price):
+        self.funds.purpose = purpose
+        self.funds.purpose_price = purpose_price
+        self.funds.save()
+
     def update_beneficiaries(self, account_dict):
         old_beneficiaries = set()
         new_beneficiaries = set()
