@@ -1,12 +1,12 @@
-from django.shortcuts import render, get_object_or_404
+from django import forms
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404
 import json
 from . import models
 from . import forms as myforms
-from django import forms
-from django.http import HttpResponse, JsonResponse
-from django.conf import settings
-from django.contrib.auth.models import User
 import pdb
 
 
@@ -15,11 +15,27 @@ def account(request):
     acc = models.Account.objects.get(user=request.user.id)
     dues = acc.get_due_list()
 
-    print(dues)
+    dues_page = []
+    for username, due_list in dues.items():
+        for funds_id, amount in due_list.items():
+            dues_page.append((username, funds_id, amount))
+
+    paginator = Paginator(dues_page, 6)
+    page = request.GET.get('page')
+    dues_page = paginator.get_page(page)
+
+    dues = {}
+    for username, funds_id, amount in dues_page.object_list:
+        if username in dues:
+            dues[username].update({funds_id: amount})
+        else:
+            dues.update({username: {funds_id: amount}})
+
     return render(
         request,
         'account/account.html',
         {'dues': dues,
+         "dues_page": dues_page,
          'account_value': acc.get_value(),
          'user_name': request.user.username}
     )
@@ -38,20 +54,26 @@ def funds(request, pk):
 @login_required(login_url='login')
 def myfunds(request):
     acc = models.Account.objects.get(user=request.user.id)
+    paginator = Paginator(acc.funds_set.all(), 8)
+    page = request.GET.get('page')
+    funds = paginator.get_page(page)
     return render(
         request,
         'account/myfunds.html',
-        {"myfunds": acc.funds_set.all()}
+        {"myfunds": funds}
     )
 
 
 @login_required(login_url='login')
 def history(request):
     acc = models.Account.objects.get(user=request.user.id)
+    paginator = Paginator(acc.get_history_funds(), 10)
+    page = request.GET.get('page')
+    history_funds = paginator.get_page(page)
     return render(
         request,
         'account/history.html',
-        {"history_funds": acc.get_history_funds()}
+        {"history_funds": history_funds}
     )
 
 def post_funds(request, BeneficiaryFormSet, pk):

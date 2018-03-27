@@ -50,9 +50,7 @@ class Account(models.Model):
 
     def get_due_list(self):
         dues = self.get_due_for_list({})
-        print(dues)
         dues.update(self.get_due_from_list(dues))
-        print(dues)
         return dues;
 
     def get_history_funds(self):
