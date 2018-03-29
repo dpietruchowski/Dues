@@ -176,3 +176,26 @@ def accounts(request):
             model_results = User.objects.filter(username__icontains=value)
             results = [x.username for x in model_results]
     return JsonResponse(json.dumps(results), safe=False)
+
+
+@login_required(login_url='login')
+def notify(request):
+    response = {
+        "success": False,
+        "message": "Nie udalo sie stworzyc notyfikacji"
+    }
+    if request.method == "GET":
+        if not u'due_id' in request.GET:
+            if not u'type' in request.GET:
+                due_id = request.GET[u'due_id']
+                type = request.GET[u'type']
+                account = models.Account.objects.get(user=request.user)
+                due = models.Due.objects.get(pk=due_id)
+                notification_queryset = account.notification_sent.filter(due=due_id,)
+                response["success"] = True
+                response["message"] = "Notyfikacja stworzona pomyslnie"
+                return JsonResponse(json.dumps(response))
+    return JsonResponse(json.dumps(response))
+
+def notifications(request):
+    pass
