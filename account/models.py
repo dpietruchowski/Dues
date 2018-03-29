@@ -1,12 +1,14 @@
 from datetime import date
 from math import fabs
 from decimal import Decimal
+from enum import Enum
 
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 import pdb
+
 
 class Account(models.Model):
     user = models.OneToOneField(
@@ -59,6 +61,13 @@ class Account(models.Model):
             funds.append(as_beneficiary.funds)
         return funds
 
+    def send_notification(self, due, message):
+        if due in self.dues:
+            due.send_notification(message, False)
+        elif due in self.dues_from:
+            due.send_notification(message, False)
+
+
 class FundsManager:
     def __init__(self, funds):
         self.funds = funds
@@ -91,6 +100,7 @@ class FundsManager:
         for beneficiary in self.funds.beneficiaries.all():
             beneficiary.delete()
         self.funds.delete()
+
 
 class Funds(models.Model):
     owner = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -225,3 +235,90 @@ class Due(models.Model):
         default=0
     )
     is_paid = models.BooleanField(default=False)
+
+    def send_notification(self, message, is_paid_type):
+        if is_paid_type:
+            from_account = self.account
+            to_account = self.for_account
+            type = Notification.Type.PAID
+        else:
+            from_account = self.for_account
+            to_account = self.account
+            type = Notification.Type.UNPAID
+
+        notification = self.notificatoin_set.filter(
+            from_account=from_account,
+            to_account=to_account
+        )
+        if notification.exists():
+            notification = notification.first()
+            notification.send(message)
+        else:
+            self.notificatoin_set.create(
+                type=type,
+                from_account=from_account,
+                to_account=to_account,
+                message=message
+            )
+
+
+class Notification(models.Model):
+    class Type(Enum):
+        PAID = 0
+        UNPAID = 1
+        ACCEPTED = 2
+        DECLINED = 3
+    TYPES = (
+        (Type.PAID, 'Paid'),
+        (Type.ACCEPTED, 'Accepted'),
+        (Type.DECLINED, 'Declined'),
+    )
+    from_account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="notifications_sent"
+    )
+    to_account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="notifications_received"
+    )
+    due = models.ForeignKey(
+        Due,
+        on_delete=models.CASCADE
+    )
+    latest_date = models.DateField(default=date.today)
+    latest_datetime = models.DateTimeField(default=timezone.now)
+    date = models.DateField(default=date.today)
+    datetime = models.DateTimeField(default=timezone.now)
+    message = models.CharField(max_length=130)
+    seen = models.BooleanField(default=False)
+
+    def send_back(self, message, is_accepted):
+        if is_accepted:
+            type = Notification.Type.ACCEPTED
+        else:
+            type = Notification.Type.DECLINED
+        notification = self.due.notificatoin_set.filter(
+            from_account=self.to_account,
+            to_account=self.from_account
+        )
+        if notification.exists():
+            notification = notification.first()
+            notification.type = type
+            notification.send(message)
+        else:
+            Notification.objects.create(
+                type=type,
+                from_account=self.to_account,
+                to_account=self.from_account,
+                due=self.due,
+                message=message
+            )
+
+    def send(self, message):
+        self.latest_date = date.today()
+        self.latest_datetime = timezone.now()
+        self.message = message
+        self.seen = False
+        self.save()
