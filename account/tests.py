@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from decimal import Decimal
-from .models import Account, Funds, Beneficiary
+from .models import Account, Funds, Beneficiary, Due, Notification
 import pdb
 
 from collections import defaultdict
@@ -252,4 +252,105 @@ class EditFundsTestCase2(TestCase):
         self.funds_testcase.delete_beneficiaries([3])
         self.funds_testcase.validate_beneficiaries({1: 5, 2: 5})
         self.funds_testcase.update({})
+        pass
+
+
+class NotificationTestCaseManager:
+    def __init__(self):
+        self.test_case = TestCase()
+        self.message = "Default message"
+        def create_account(number):
+            account = Account(
+                user=User.objects.create_user(
+                    get_username(number),
+                    'asd@dom.pl',
+                    'qwerty12'
+                )
+            )
+            account.save()
+            return account
+        users = [1, 2]
+        for key in users:
+            create_account(key)
+        self.funds = Funds.objects.create(
+            owner=get_account(1),
+            purpose='TestParty',
+            purpose_price=10.0
+        )
+        self.due = Due.objects.create(
+            funds=self.funds,
+            account=get_account(1),
+            for_account=get_account(2),
+            amount=20
+        )
+
+    def notify(self, user):
+        account = get_account(user)
+        account.send_notifiction(self.due, self.message)
+        pass
+
+    def notify_back(self, notification_tuple, is_accepted):
+        account1 = get_account(notification_tuple[0])
+        account2 = get_account(notification_tuple[1])
+        notification_queryset = Notification.objects.filter(
+            from_account=account1,
+            to_account=account2,
+            due=self.due,
+        )
+        self.assert_equal(notification_queryset.exist(), True)
+        self.assert_equal(notification_queryset.count(), 1)
+        notification = notification_queryset.first()
+        notification.send_back(self.message, is_accepted)
+        pass
+
+    def validate_notifications(self, expected_notifications):
+        self.assert_equal(Notification.objects.all().count(), expected_notifications.lenght())
+        for notification_tuple in expected_notifications:
+            type = notification_tuple[0];
+            from_account = notification_tuple[1]
+            to_account = notification_tuple[2]
+            seen = notification_tuple[3]
+            self.validate_notification(type, from_account, to_account, seen)
+
+    def validate_notification(self, type, from_account, to_account, seen):
+        notification_queryset = Notification.objects.filter(
+            from_account=from_account,
+            to_account=to_account,
+            due=self.due,
+        )
+        self.assert_equal(notification_queryset.exist(), True)
+        self.assert_equal(notification_queryset.count(), 1)
+        notification = notification_queryset.first()
+        self.assert_equal(notification.type, type)
+        self.assert_equal(notification.seen, seen)
+
+class NotificationTestCase(TestCase):
+    def setUp(self):
+        self.manager = NotificationTestCaseManager()
+
+    def test_1_notify(self):
+        pass
+
+    def test_2_notify(self):
+        pass
+
+    def test_1_notify_twice(self):
+        pass
+
+    def test_2_notify_twice(self):
+        pass
+
+    def test_2_accept(self):
+        pass
+
+    def test_2_decline(self):
+        pass
+
+    def test_2_accept_twice(self):
+        pass
+
+    def test_2_accept_1_notify(self):
+        pass
+
+    def test_2_decline_1_notify(self):
         pass
