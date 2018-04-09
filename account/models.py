@@ -62,9 +62,9 @@ class Account(models.Model):
         return funds
 
     def send_notification(self, due, message):
-        if due in self.dues:
-            due.send_notification(message, False)
-        elif due in self.dues_from:
+        if due in self.dues.all():
+            due.send_notification(message, True)
+        elif due in self.dues_from.all():
             due.send_notification(message, False)
 
 
@@ -246,7 +246,7 @@ class Due(models.Model):
             to_account = self.account
             type = Notification.Type.UNPAID
 
-        notification = self.notificatoin_set.filter(
+        notification = self.notification_set.filter(
             from_account=from_account,
             to_account=to_account
         )
@@ -254,7 +254,7 @@ class Due(models.Model):
             notification = notification.first()
             notification.send(message)
         else:
-            self.notificatoin_set.create(
+            self.notification_set.create(
                 type=type,
                 from_account=from_account,
                 to_account=to_account,
@@ -268,11 +268,15 @@ class Notification(models.Model):
         UNPAID = 1
         ACCEPTED = 2
         DECLINED = 3
-    TYPES = (
-        (Type.PAID, 'Paid'),
-        (Type.ACCEPTED, 'Accepted'),
-        (Type.DECLINED, 'Declined'),
-    )
+
+        @classmethod
+        def choices(cls):
+            return tuple((x.name, x.value) for x in cls)
+
+        def __int__(self):
+            return self.value
+
+    type = models.IntegerField(choices=Type.choices())
     from_account = models.ForeignKey(
         Account,
         on_delete=models.CASCADE,
@@ -299,7 +303,7 @@ class Notification(models.Model):
             type = Notification.Type.ACCEPTED
         else:
             type = Notification.Type.DECLINED
-        notification = self.due.notificatoin_set.filter(
+        notification = self.due.notification_set.filter(
             from_account=self.to_account,
             to_account=self.from_account
         )
@@ -322,3 +326,6 @@ class Notification(models.Model):
         self.message = message
         self.seen = False
         self.save()
+
+    def __str__(self):
+        return '(%s%s:%s->%s)' % (self.due, self.Type(self.type).name, self.from_account.pk, self.to_account.pk)
