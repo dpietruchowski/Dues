@@ -284,10 +284,12 @@ class NotificationTestCaseManager:
             amount=20
         )
 
+    def assert_equal(self, first, second):
+        self.test_case.assertEqual(first, second)
+
     def notify(self, user):
         account = get_account(user)
-        account.send_notifiction(self.due, self.message)
-        pass
+        account.send_notification(self.due, self.message)
 
     def notify_back(self, notification_tuple, is_accepted):
         account1 = get_account(notification_tuple[0])
@@ -297,18 +299,17 @@ class NotificationTestCaseManager:
             to_account=account2,
             due=self.due,
         )
-        self.assert_equal(notification_queryset.exist(), True)
+        self.assert_equal(notification_queryset.exists(), True)
         self.assert_equal(notification_queryset.count(), 1)
         notification = notification_queryset.first()
         notification.send_back(self.message, is_accepted)
-        pass
 
     def validate_notifications(self, expected_notifications):
-        self.assert_equal(Notification.objects.all().count(), expected_notifications.lenght())
+        self.assert_equal(Notification.objects.all().count(), len(expected_notifications))
         for notification_tuple in expected_notifications:
-            type = notification_tuple[0];
-            from_account = notification_tuple[1]
-            to_account = notification_tuple[2]
+            type = notification_tuple[0]
+            from_account = get_account(notification_tuple[1])
+            to_account = get_account(notification_tuple[2])
             seen = notification_tuple[3]
             self.validate_notification(type, from_account, to_account, seen)
 
@@ -318,10 +319,10 @@ class NotificationTestCaseManager:
             to_account=to_account,
             due=self.due,
         )
-        self.assert_equal(notification_queryset.exist(), True)
+        self.assert_equal(notification_queryset.exists(), True)
         self.assert_equal(notification_queryset.count(), 1)
         notification = notification_queryset.first()
-        self.assert_equal(notification.type, type)
+        self.assert_equal(notification.type, int(type))
         self.assert_equal(notification.seen, seen)
 
 class NotificationTestCase(TestCase):
@@ -329,28 +330,90 @@ class NotificationTestCase(TestCase):
         self.manager = NotificationTestCaseManager()
 
     def test_1_notify(self):
+        self.manager.notify(1)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False)
+        ])
         pass
 
     def test_2_notify(self):
+        self.manager.notify(2)
+        self.manager.validate_notifications([
+            (Notification.Type.UNPAID, 2, 1, False)
+        ])
         pass
 
     def test_1_notify_twice(self):
+        self.manager.notify(1)
+        self.manager.notify(1)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False)
+        ])
         pass
 
     def test_2_notify_twice(self):
+        self.manager.notify(2)
+        self.manager.notify(2)
+        self.manager.validate_notifications([
+            (Notification.Type.UNPAID, 2, 1, False)
+        ])
         pass
 
     def test_2_accept(self):
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), True)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False),
+            (Notification.Type.ACCEPTED, 2, 1, False)
+        ])
         pass
 
     def test_2_decline(self):
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), False)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False),
+            (Notification.Type.DECLINED, 2, 1, False)
+        ])
         pass
 
     def test_2_accept_twice(self):
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), True)
+        self.manager.notify_back((1, 2), True)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False),
+            (Notification.Type.ACCEPTED, 2, 1, False)
+        ])
         pass
 
     def test_2_accept_1_notify(self):
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), True)
+        self.manager.notify(1)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False),
+            (Notification.Type.ACCEPTED, 2, 1, False)
+        ])
         pass
 
     def test_2_decline_1_notify(self):
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), False)
+        self.manager.notify(1)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False),
+            (Notification.Type.DECLINED, 2, 1, False)
+        ])
+        pass
+
+    def test_2_decline_1_notify_accept(self):
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), False)
+        self.manager.notify(1)
+        self.manager.notify_back((1, 2), True)
+        self.manager.validate_notifications([
+            (Notification.Type.PAID, 1, 2, False),
+            (Notification.Type.ACCEPTED, 2, 1, False)
+        ])
         pass
