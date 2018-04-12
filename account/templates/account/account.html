@@ -23,12 +23,12 @@
           <p class="card-text" >{{ due_user }}</p>
         </div>
       </div>
-    {% for funds_id, amount in due_amounts.items %}
+    {% for funds_id, due in due_amounts.items %}
     <div class="card-body">
-      <div style="float:left;"><p class="card-text" >{{ amount }}zl</p></div>
+      <div style="float:left;"><p class="card-text" >{{ due.1 }}zl</p></div>
       <div style="float:right;">
         <a href="/funds/{{ funds_id }}" class="btn btn-primary">Skladka</a>
-        <a href="#" class="btn btn-primary">Powiadom</a>
+        <a href="#" class="btn btn-primary notify" id="notify{{ due.0 }}">Powiadom</a>
       </div>
     </div>
     {% endfor %}

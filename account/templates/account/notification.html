@@ -1,0 +1,44 @@
+{% extends "template.html" %}
+
+{% block nav-noti %}active{% endblock %}
+
+{% block content %}
+<h5>Powiadomienia</h5>
+{% for notification in notifications %}
+    <div class="card">
+      <div class="card-header">
+        <div style="float:left;">
+          <p class="card-text" >{{ notification.from_account.user.username }}</p>
+        </div>
+      </div>
+    <div class="card-body">
+      <div style="float:left;"><p class="card-text" >{{ notification.message }}</p></div>
+      <div style="float:right;">
+        {% if  notification.type is notification_types.PAID.value %}
+        <a href="#" class="btn btn-primary">Akceptuj</a>
+        <a href="#" class="btn btn-primary">Odrzuc</a>
+        {% endif %}
+        <a href="/funds/{{ notification.due.funds.pk }}" class="btn btn-primary">Skladka</a>
+      </div>
+    </div>
+    </div>
+{% endfor %}
+
+<div class="pagination">
+  <span class="step-links">
+    {% if notifications.has_previous %}
+      <a href="?page=1">&laquo; first</a>
+      <a href="?page={{ notifications.previous_page_number }}">previous</a>
+    {% endif %}
+
+    <span class="current">
+      Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}.
+    </span>
+
+    {% if notifications.has_next %}
+      <a href="?page={{ notifications.next_page_number }}">next</a>
+      <a href="?page={{ notifications.paginator.num_pages }}">last &raquo;</a>
+    {% endif %}
+  </span>
+</div>
+{% endblock %}

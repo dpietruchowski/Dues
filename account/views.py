@@ -179,23 +179,49 @@ def accounts(request):
 
 
 @login_required(login_url='login')
+def new_notify(request):
+    response = {
+        "new_notifications": 0,
+        "message": "Nie ma nowej notyfikacji"
+    }
+    if request.method == "GET":
+        acc = models.Account.objects.get(user=request.user.id)
+        new_notifications = acc.notifications_received.filter(seen=False)
+        if new_notifications.exists():
+            response["new_notifications"] = new_notifications.count()
+            response["message"] = "Sa nowe notyfikacje"
+    return JsonResponse(json.dumps(response), safe=False)
+
+@login_required(login_url='login')
 def notify(request):
     response = {
         "success": False,
         "message": "Nie udalo sie stworzyc notyfikacji"
     }
     if request.method == "GET":
-        if not u'due_id' in request.GET:
-            if not u'type' in request.GET:
-                due_id = request.GET[u'due_id']
-                type = request.GET[u'type']
-                account = models.Account.objects.get(user=request.user)
-                due = models.Due.objects.get(pk=due_id)
-                notification_queryset = account.notification_sent.filter(due=due_id,)
+        if u'due_id' in request.GET:
+            due_id = request.GET[u'due_id']
+            acc = models.Account.objects.get(user=request.user)
+            due = models.Due.objects.get(pk=int(due_id))
+            sent = acc.send_notification(due)
+            if sent is not None:
                 response["success"] = True
                 response["message"] = "Notyfikacja stworzona pomyslnie"
-                return JsonResponse(json.dumps(response))
-    return JsonResponse(json.dumps(response))
+    return JsonResponse(json.dumps(response), safe=False)
 
+@login_required(login_url='login')
 def notifications(request):
+    acc = models.Account.objects.get(user=request.user.id)
+    for notification in acc.notifications_received.filter(seen=False):
+        notification.seen = True
+        notification.save()
+    paginator = Paginator(acc.notifications_received.all(), 10)
+    page = request.GET.get('page')
+    notifications_received = paginator.get_page(page)
+    return render(
+        request,
+        'account/notification.html',
+        {"notifications": notifications_received,
+         "notification_types": dict(models.Notification.Type.__members__)}
+    )
     pass

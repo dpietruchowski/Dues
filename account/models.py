@@ -21,7 +21,7 @@ class Account(models.Model):
         value = 0
         for due_user, due_amounts in dues.items():
             for funds_id, amount in due_amounts.items():
-                value += amount
+                value += amount[1]
         return value
 
     def get_due_from_list(self, due_list):
@@ -32,9 +32,9 @@ class Account(models.Model):
             amount = 1 * due.amount
             funds_id = due.funds.id
             if key in due_list:
-                due_list[key].update({funds_id: amount})
+                due_list[key].update({funds_id: (due.pk, amount)})
             else:
-                due_list.update({key: {funds_id: amount}})
+                due_list.update({key: {funds_id: (due.pk, amount)}})
         return due_list
 
     def get_due_for_list(self, due_list):
@@ -45,9 +45,9 @@ class Account(models.Model):
             amount = -1 * due.amount
             funds_id = due.funds.id
             if key in due_list:
-                due_list[key].update({funds_id: amount})
+                due_list[key].update({funds_id: (due.pk, amount)})
             else:
-                due_list.update({key: {funds_id: amount}})
+                due_list.update({key: {funds_id: (due.pk, amount)}})
         return due_list
 
     def get_due_list(self):
@@ -61,11 +61,13 @@ class Account(models.Model):
             funds.append(as_beneficiary.funds)
         return funds
 
-    def send_notification(self, due, message):
+    def send_notification(self, due):
         if due in self.dues.all():
-            due.send_notification(message, True)
+            return due.send_notification("Spłaciłem dług. Proszę usuń go.", True)
         elif due in self.dues_from.all():
-            due.send_notification(message, False)
+            return due.send_notification("Proszę spłać dług", False)
+        else:
+            return None
 
 
 class FundsManager:
@@ -254,12 +256,13 @@ class Due(models.Model):
             notification = notification.first()
             notification.send(message)
         else:
-            self.notification_set.create(
+            notification = self.notification_set.create(
                 type=type,
                 from_account=from_account,
                 to_account=to_account,
                 message=message
             )
+        return notification
 
 
 class Notification(models.Model):
