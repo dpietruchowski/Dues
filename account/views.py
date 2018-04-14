@@ -212,7 +212,10 @@ def notify(request):
 @login_required(login_url='login')
 def notifications(request):
     acc = models.Account.objects.get(user=request.user.id)
-    paginator = Paginator(acc.notifications_received.all(), 10)
+    paginator = Paginator(
+        acc.notifications_received.all().order_by("-latest_date", "-latest_datetime"),
+        10
+    )
     page = request.GET.get('page')
     notifications_received = paginator.get_page(page)
     for notification in acc.notifications_received.filter(seen=False):
