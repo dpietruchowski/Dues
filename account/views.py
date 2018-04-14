@@ -212,16 +212,17 @@ def notify(request):
 @login_required(login_url='login')
 def notifications(request):
     acc = models.Account.objects.get(user=request.user.id)
-    for notification in acc.notifications_received.filter(seen=False):
-        notification.seen = True
-        notification.save()
     paginator = Paginator(acc.notifications_received.all(), 10)
     page = request.GET.get('page')
     notifications_received = paginator.get_page(page)
+    for notification in acc.notifications_received.filter(seen=False):
+        notification.seen = True
+        notification.save()
     return render(
         request,
         'account/notification.html',
-        {"notifications": notifications_received,
+        {"new_notify_class": "new_notify",
+         "notifications": notifications_received,
          "notification_types": dict(models.Notification.Type.__members__)}
     )
     pass
