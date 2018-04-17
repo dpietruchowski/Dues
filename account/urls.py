@@ -10,6 +10,7 @@ urlpatterns = [
     path('funds', views.myfunds, name='myfunds'),
     path('history', views.history, name='history'),
     path('notifications', views.notifications, name='notifications'),
+    path('notify_back', views.notify_back, name='notify_back'),
     # Json response
     path('notify', views.notify, name='notify'),
     path('new_notify', views.new_notify, name='new_notify'),

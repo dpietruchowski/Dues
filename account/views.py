@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 import json
 from . import models
 from . import forms as myforms
@@ -192,6 +192,24 @@ def new_notify(request):
             response["message"] = "Sa nowe notyfikacje"
     return JsonResponse(json.dumps(response), safe=False)
 
+def send_notification(request):
+    sent = None
+    if request.method == "GET":
+        if u'due_id' in request.GET:
+            if u'due_type' in request.GET:
+                due_type = int(request.GET[u'due_type'])
+                due_id = request.GET[u'due_id']
+                acc = models.Account.objects.get(user=request.user)
+                due = models.Due.objects.get(pk=int(due_id))
+                if due_type == 0:
+                    sent = acc.send_notification(due)
+                elif due_type == 1:
+                    sent = acc.accept_notification(due)
+                else:
+                    sent = acc.decline_notification(due)
+
+    return sent
+
 @login_required(login_url='login')
 def notify(request):
     response = {
@@ -200,20 +218,42 @@ def notify(request):
     }
     if request.method == "GET":
         if u'due_id' in request.GET:
-            due_id = request.GET[u'due_id']
-            acc = models.Account.objects.get(user=request.user)
-            due = models.Due.objects.get(pk=int(due_id))
-            sent = acc.send_notification(due)
-            if sent is not None:
-                response["success"] = True
-                response["message"] = "Notyfikacja stworzona pomyslnie"
+            if u'due_type' in request.GET:
+                due_type = int(request.GET[u'due_type'])
+                due_id = request.GET[u'due_id']
+                acc = models.Account.objects.get(user=request.user)
+                due = models.Due.objects.get(pk=int(due_id))
+                sent = acc.send_notification(due)
+                if sent is not None:
+                    response["success"] = True
+                    response["message"] = "Notyfikacja stworzona pomyslnie"
     return JsonResponse(json.dumps(response), safe=False)
+
+@login_required(login_url='login')
+def notify_back(request):
+    if request.method == "GET":
+        if u'noti_id' in request.GET:
+            if u'answer' in request.GET:
+                noti_id = int(request.GET[u'noti_id'])
+                answer = int(request.GET[u'answer'])
+                acc = models.Account.objects.get(user=request.user)
+                noti = models.Notification.objects.get(pk=int(noti_id))
+                noti.answered = True
+                noti.save()
+                due = noti.due
+                if answer == 0:
+                    pass
+                elif answer == 1:
+                    acc.accept_notification(due)
+                else:
+                    acc.decline_notification(due)
+    return redirect(notifications)
 
 @login_required(login_url='login')
 def notifications(request):
     acc = models.Account.objects.get(user=request.user.id)
     paginator = Paginator(
-        acc.notifications_received.all().order_by("-latest_date", "-latest_datetime"),
+        acc.notifications_received.filter(answered=False).order_by("-latest_date", "-latest_datetime"),
         10
     )
     page = request.GET.get('page')

@@ -15,8 +15,10 @@
       <div style="float:left;"><p class="card-text" >{{ notification.message }}</p></div>
       <div style="float:right;">
         {% if  notification.type is notification_types.PAID.value %}
-        <a href="#" class="btn btn-primary">Akceptuj</a>
-        <a href="#" class="btn btn-primary">Odrzuc</a>
+        <a href="notify_back?noti_id={{ notification.pk }}&answer=1" class="btn btn-primary">Akceptuj</a>
+        <a href="notify_back?noti_id={{ notification.pk }}&answer=2" class="btn btn-primary">Odrzuc</a>
+        {% else %}
+        <a href="notify_back?noti_id={{ notification.pk }}&answer=0" class="btn btn-primary">Ok</a>
         {% endif %}
         <a href="/funds/{{ notification.due.funds.pk }}" class="btn btn-primary">Skladka</a>
       </div>

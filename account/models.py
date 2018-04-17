@@ -61,11 +61,23 @@ class Account(models.Model):
             funds.append(as_beneficiary.funds)
         return funds
 
+    def accept_notification(self, due):
+        if due in self.dues_from.all():
+            return due.send_accept("Ok. Zaakceptowałem.")
+        else:
+            return None
+
+    def decline_notification(self, due):
+        if due in self.dues_from.all():
+            return due.send_decline("Pieniądze nie wpłyneły na moje konto.")
+        else:
+            return None
+
     def send_notification(self, due):
         if due in self.dues.all():
-            return due.send_notification("Spłaciłem dług. Proszę usuń go.", True)
+            return due.send_paid("Spłaciłem dług. Proszę usuń go.")
         elif due in self.dues_from.all():
-            return due.send_notification("Proszę spłać dług", False)
+            return due.send_unpaid("Proszę spłać dług")
         else:
             return None
 
@@ -238,30 +250,59 @@ class Due(models.Model):
     )
     is_paid = models.BooleanField(default=False)
 
-    def send_notification(self, message, is_paid_type):
-        if is_paid_type:
-            from_account = self.account
-            to_account = self.for_account
-            type = Notification.Type.PAID
-        else:
-            from_account = self.for_account
-            to_account = self.account
-            type = Notification.Type.UNPAID
-
+    def get_notification(self):
         notification = self.notification_set.filter(
-            from_account=from_account,
-            to_account=to_account
+            from_account=self.account,
+            to_account=self.for_account
         )
         if notification.exists():
             notification = notification.first()
-            notification.send(message)
         else:
             notification = self.notification_set.create(
-                type=type,
-                from_account=from_account,
-                to_account=to_account,
-                message=message
+                type=Notification.Type.PAID,
+                from_account=self.account,
+                to_account=self.for_account,
+                message=""
             )
+        return notification
+
+    def get_notification_back(self):
+        notification = self.notification_set.filter(
+            from_account=self.for_account,
+            to_account=self.account
+        )
+        if notification.exists():
+            notification = notification.first()
+            notification.type = type
+        else:
+            notification = self.notification_set.create(
+                type=Notification.Type.UNPAID,
+                from_account=self.for_account,
+                to_account=self.account,
+                message=""
+            )
+        return notification
+
+    def send_paid(self, message):
+        notification = self.get_notification()
+        notification.send(message, Notification.Type.PAID)
+        return notification
+
+    def send_unpaid(self, message):
+        notification = self.get_notification_back()
+        notification.send(message, Notification.Type.UNPAID)
+        return notification
+
+    def send_accept(self, message):
+        notification = self.get_notification_back()
+        notification.send(message, Notification.Type.ACCEPTED)
+        self.is_paid = True
+        self.save()
+        return notification
+
+    def send_decline(self, message):
+        notification = self.get_notification_back()
+        notification.send(message, Notification.Type.DECLINED)
         return notification
 
 
@@ -300,34 +341,15 @@ class Notification(models.Model):
     datetime = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=130)
     seen = models.BooleanField(default=False)
+    answered = models.BooleanField(default=False)
 
-    def send_back(self, message, is_accepted):
-        if is_accepted:
-            type = Notification.Type.ACCEPTED
-        else:
-            type = Notification.Type.DECLINED
-        notification = self.due.notification_set.filter(
-            from_account=self.to_account,
-            to_account=self.from_account
-        )
-        if notification.exists():
-            notification = notification.first()
-            notification.type = type
-            notification.send(message)
-        else:
-            Notification.objects.create(
-                type=type,
-                from_account=self.to_account,
-                to_account=self.from_account,
-                due=self.due,
-                message=message
-            )
-
-    def send(self, message):
+    def send(self, message, type):
         self.latest_date = date.today()
         self.latest_datetime = timezone.now()
         self.message = message
+        self.type = type
         self.seen = False
+        self.answered = False
         self.save()
 
     def __str__(self):
