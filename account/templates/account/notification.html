@@ -8,7 +8,10 @@
     <div class="card">
       <div class="card-header">
         <div style="float:left;">
-          <p class="card-text" >{{ notification.from_account.user.username }}</p>
+          <p class="card-text" >{{ notification.latest_datetime }} : {{ notification.from_account.user.username }}</p>
+        </div>
+        <div style="float:right;">
+          <p class="card-text" >{{ notification.due.funds.date }} : {{ notification.due.funds.purpose }} - {{ notification.due.amount }}zl</p>
         </div>
       </div>
     <div class="card-body">

@@ -13,8 +13,7 @@
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <!-- Custom styles for this auth_template.html -->
     <link href="{% static 'css/starter-template.css' %}" rel="stylesheet">
-    <link href="{% static 'css/my.css' %}" rel="stylesheet">
-    <link href="{% static 'css/notify.css' %}" rel="stylesheet">
+    <link href="{% static 'css/my_styles.css' %}" rel="stylesheet">
   </head>
 
   <body>
@@ -33,7 +32,7 @@
               <a class="nav-link" href="/funds">Moje skladki</a>
             </li>
             <li class="nav-item {% block nav-noti %}{% endblock %}">
-              <a class="nav-link {{ new_notify_class }}" href="/notifications" id="notification_button">Powiadomienia</a>
+              <a class="nav-link" href="/notifications" id="notification_button">Powiadomienia</a>
             </li>
             <li class="nav-item {% block nav-history %}{% endblock %}">
               <a class="nav-link" href="/history">Historia</a>
@@ -68,7 +67,6 @@
     <script src="{% static 'js/jquery.js' %}"></script>
     <script src="{% static 'js/search_users.js' %}"></script>
     <script src="{% static 'js/popper.js' %}"></script>
-    <script src="{% static 'js/notify.js' %}"></script>
     <script src="{% static 'js/new_notify.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     {% block scripts %}

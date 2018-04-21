@@ -10,6 +10,12 @@ from . import forms as myforms
 import pdb
 
 
+def info_view(information):
+    return render(
+        'account/information.html',
+        {"information": information}
+    )
+
 @login_required(login_url='login')
 def account(request):
     acc = models.Account.objects.get(user=request.user.id)
@@ -54,7 +60,7 @@ def funds(request, pk):
 @login_required(login_url='login')
 def myfunds(request):
     acc = models.Account.objects.get(user=request.user.id)
-    paginator = Paginator(acc.funds_set.all(), 8)
+    paginator = Paginator(acc.funds_set.all().order_by('-date'), 8)
     page = request.GET.get('page')
     funds = paginator.get_page(page)
     return render(
@@ -109,9 +115,9 @@ def post_funds(request, BeneficiaryFormSet, pk):
             purpose_price=purpose_price
         )
         funds_manager.update_beneficiaries(beneficiaries)
-        return HttpResponse("YEAH UDALO SIE!!")
+        return redirect(myfunds)
 
-    return HttpResponse("dupa nie udalo sie")
+    return info_view("Nie udalo sie")
 
 @login_required(login_url='login')
 def edit_funds(request, pk):
@@ -119,7 +125,7 @@ def edit_funds(request, pk):
     if request.method == 'POST':
         return post_funds(request, BeneficiaryFormSet, pk)
     else:
-        funds = models.Funds.objects.get(pk=pk)
+        funds = get_object_or_404(models.Funds, pk=pk)
         account = models.Account.objects.get(user=request.user)
         if account != funds.owner:
             return HttpResponse("Nie masz uprawnien do edytowania tej skladki")
@@ -159,12 +165,12 @@ def new_funds(request):
 @login_required(login_url='login')
 def delete_funds(request, pk):
     account = models.Account.objects.get(user=request.user)
-    funds = models.Funds.objects.get(pk=pk)
+    funds = get_object_or_404(models.Funds, pk=pk)
     if account != funds.owner:
-        return HttpResponse("Nie masz uprawnien do edytowania tej skladki")
+        return redirect(myfunds)
     funds_manager = models.FundsManager(funds)
     funds_manager.delete_funds()
-    return HttpResponse("Udalo sie usunales skladke( id : " + str(pk) + " )")
+    return redirect(myfunds)
 
 
 @login_required(login_url='login')
@@ -253,7 +259,7 @@ def notify_back(request):
 def notifications(request):
     acc = models.Account.objects.get(user=request.user.id)
     paginator = Paginator(
-        acc.notifications_received.filter(answered=False).order_by("-latest_date", "-latest_datetime"),
+        acc.notifications_received.filter(answered=False).order_by("-seen","-latest_date", "-latest_datetime"),
         10
     )
     page = request.GET.get('page')
@@ -264,8 +270,7 @@ def notifications(request):
     return render(
         request,
         'account/notification.html',
-        {"new_notify_class": "new_notify",
-         "notifications": notifications_received,
+        {"notifications": notifications_received,
          "notification_types": dict(models.Notification.Type.__members__)}
     )
     pass
