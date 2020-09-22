@@ -1,2 +1,2 @@
 # Dues
-Dues is an application to settle up with friends
+Dues is an application to settle the account with friends
